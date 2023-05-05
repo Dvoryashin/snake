@@ -6,10 +6,14 @@ from tkinter import ttk
 root = Tk()    
 cell_x = 0
 cell_y = 0
-arr_cells_x = []
-arr_cells_y = []  
+cells_x = []
+cells_y = [] 
 head = 0
 apple = 0
+snake = []
+snake_coords_y = []
+snake_coords_x = []
+t = 1
 
 root.title("Приложение на Tkinter")   
 root.geometry("500x500")  
@@ -22,49 +26,65 @@ def create_squares():
     for i in range(8):
         for i in range(8):
             canvas.create_rectangle(cell_x, cell_y, cell_x + 62.5, cell_y + 62.5, fill="black", outline="blue") 
-            arr_cells_x.append(cell_x)
-            arr_cells_y.append(cell_y)
+            cells_x.append(cell_x)
+            cells_y.append(cell_y)
             cell_x = cell_x + 62.5
         cell_x = 0
         cell_y = cell_y + 62.5
 
 create_squares()
 
-rand_x = random.randint(0, len(arr_cells_x) - 1)
-rand_y = random.randint(0, len(arr_cells_y) - 1)
+rand_x = random.randint(0, len(cells_x) - 1)
+rand_y = random.randint(0, len(cells_y) - 1)
 
 def create_head(head_x, head_y):
     head = canvas.create_rectangle(head_x, head_y, head_x + 62.5, head_y + 62.5, fill="blue", outline="blue")
     return head
 
 def create_apple(rand_x, rand_y):
-    apple = canvas.create_rectangle(arr_cells_x[rand_x], arr_cells_y[rand_y], arr_cells_x[rand_x] + 62.5, arr_cells_y[rand_y] + 62.5, fill="red", outline="blue")
+    apple = canvas.create_rectangle(cells_x[rand_x], cells_y[rand_y], cells_x[rand_x] + 62.5, cells_y[rand_y] + 62.5, fill="red", outline="blue")
     return apple
 
-head = create_head(312.5, 312.5)
+snake.append(create_head(312.5, 312.5))
 apple = create_apple(rand_x, rand_y)
 
 def move_snake(event, x, y):
 
-    global head
+    global snake
     global apple
     global rand_x
     global rand_y
+    global snake_coords_x
+    global snake_coords_y
+    global t
 
-    canvas.move(head, x, y)
-    head_x = canvas.coords(head)[0]
-    head_y = canvas.coords(head)[1]
+
+    last = canvas.coords(snake[0])
+    print(len(snake))
+    canvas.move(snake[0], x, y)
+    head_x = canvas.coords(snake[0])[0]
+    head_y = canvas.coords(snake[0])[1]
     canvas.delete("all")
-
+    
     create_squares()
+    i = 1
+    for i in range(0, len(snake_coords_x)):
+        snake[len(snake) - 1] = (create_head(snake_coords_x[i], snake_coords_y[i]))
 
-    head = create_head(head_x, head_y)
     apple = create_apple(rand_x, rand_y)
-    if canvas.coords(apple) == canvas.coords(head):
+    snake[0] = create_head(head_x, head_y)
+    # snake[1] = create_head(last[0], last[1])
+    t = t + 1
+    if canvas.coords(apple) == canvas.coords(snake[0]):
         canvas.delete(apple)
-        rand_y = random.randint(0, len(arr_cells_y) - 1)
-        rand_x = random.randint(0, len(arr_cells_x) - 1)
+        rand_y = random.randint(0, len(cells_y) - 1)
+        rand_x = random.randint(0, len(cells_x) - 1)
         apple = create_apple(rand_x, rand_y)
+        snake_coords_x.append(last[0])
+        snake_coords_y.append(last[1])
+        snake.append(create_head(snake_coords_x[len(snake_coords_x)-1], snake_coords_y[len(snake_coords_y)-1]))
+
+
 
 root.update()
 canvas.bind_all("<KeyPress-Up>", lambda event: move_snake(event, 0, -62.5))
