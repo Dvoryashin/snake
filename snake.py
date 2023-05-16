@@ -35,7 +35,7 @@ snake.append(create_item(canvas, snake_x, snake_y, 'green'))
 apple = create_item(canvas, rand_x, rand_y, 'red')
 
 class Snake:
-
+    
     def __init__(self, canvas, root, snake, snake_x, snake_y, len_snake, apple, speed, direction, score):
         
         self.canvas = canvas
@@ -48,42 +48,32 @@ class Snake:
         self.direction = direction
         self.score = score
         self.root = root
-
-    def move_snake(self, event, x, y, function_direction):
-        self.function_direction = function_direction
+    
+    def check_border_pos(self):
+        
+        if self.snake_x == -1:
+            self.snake_x = 24
+        if self.snake_x == 25:
+            self.snake_x = 0
+        if self.snake_y == -1:
+            self.snake_y = 24
+        if self.snake_y == 25:
+            self.snake_y = 0 
+    
+    def move_snake(self, x, y):
+        
         while 1 > 0:
 
-            if self.direction == 'Up' and self.function_direction == 'Down':
-                return 0
-            if self.direction == 'Down' and self.function_direction == 'Up':
-                return 0
-            if self.direction == 'Left' and self.function_direction == 'Right':
-                return 0
-            if self.direction == 'Right' and self.function_direction == 'Left':
-                return 0
             d = 1
             self.snake_x = self.snake_x + x
             self.snake_y = self.snake_y + y
-            if self.snake_x == -1:
-
-                self.snake_x = 24
-
-            if self.snake_x == 25:
-
-                self.snake_x = 0
-            #
-            if self.snake_y == -1:
-
-                self.snake_y = 24
-
-            if self.snake_y == 25:
-
-                self.snake_y = 0
+            self.check_border_pos()
                 
             for d in range(0, len(self.snake) - 1):
                 if self.canvas.coords(self.snake[len(self.snake) - 1]) == self.canvas.coords(self.snake[d]):
-                    while 1 > 0:
-                        time.sleep(10)
+                    # while 1 > 0:
+                    #     time.sleep(10)
+                    self.len_snake = 1
 
             self.snake.append(create_item(self.canvas, self.snake_x, self.snake_y, 'green'))
             if len(self.snake) > self.len_snake:
@@ -101,14 +91,28 @@ class Snake:
                 self.rand_x = random.randint(0, 24)
                 self.rand_y = random.randint(0, 24)
                 self.apple = create_item(self.canvas, self.rand_x, self.rand_y, 'red')
-            self.direction = self.function_direction
+            
+    def check_direction(self, event, x, y, function_direction):
         
-
+        if self.direction == 'Up' and function_direction == 'Down':
+            return 0
+        if self.direction == 'Down' and function_direction == 'Up':
+            return 0
+        if self.direction == 'Left' and function_direction == 'Right':
+            return 0
+        if self.direction == 'Right' and function_direction == 'Left':
+            return 0
+        else:
+            self.direction = function_direction
+            self.move_snake(x, y)
+        
 snake = Snake(canvas, root, snake, snake_x, snake_y, len_snake, apple, speed, direction, score)
 
-canvas.bind_all("<KeyPress-Up>", lambda event: snake.move_snake(event, 0, -1, 'Up'))
-canvas.bind_all("<KeyPress-Down>", lambda event: snake.move_snake(event, 0, 1, 'Down'))
-canvas.bind_all("<KeyPress-Left>", lambda event: snake.move_snake(event, -1, 0, 'Left'))
-canvas.bind_all("<KeyPress-Right>", lambda event: snake.move_snake(event, 1, 0, 'Right'))
+canvas.bind_all("<KeyPress-Up>", lambda event: snake.check_direction(event, 0, -1, 'Up'))
+canvas.bind_all("<KeyPress-Down>", lambda event: snake.check_direction(event, 0, 1, 'Down'))
+canvas.bind_all("<KeyPress-Left>", lambda event: snake.check_direction(event, -1, 0, 'Left'))
+canvas.bind_all("<KeyPress-Right>", lambda event: snake.check_direction(event, 1, 0, 'Right'))
 
 root.mainloop()
+
+
