@@ -1,118 +1,202 @@
+import pygame
 import time
 import random
-from tkinter import *
-from tkinter import ttk
 
-root = Tk()    
-apple = 0
-snake = []
-snake_item = 20
-snake_x = 12
-snake_y = 12
-len_snake = 1
-speed = 0.1
-t = 1
-direction = ''
+# Инициализируем импортированные модули
+pygame.font.init()
+pygame.init()
 
+#Задаем переменные для цветов
+white = (255, 255, 255)
+yellow = (255, 255, 102)
+black = (0, 0, 0)
+red = (213, 50, 80)
+green = (9, 173, 6 )
+blue = (50, 153, 213)
+violet = (100, 0, 255)
 
-root.title("Приложение на Tkinter")   
-root.geometry("500x600")  
-root.resizable(0, 0)
-canvas = Canvas(root,width=500,height=600,bg="black",cursor="pencil")
-canvas.create_rectangle(3, 507, 497, 597, fill = "black", outline = "violet", width = 8)
-score = canvas.create_text(480, 540, text=len_snake, fill='violet', font=('Helvetica 15 bold'))
-canvas.pack()
-root.update()
+# Ширина окна
+dis_width = 600
 
-def create_item(canvas, x, y, fill):
-    head = canvas.create_rectangle(snake_item * x, snake_item * y, snake_item * x + snake_item, snake_item * y + snake_item, fill=fill, outline="black")
-    return head
+# Высота окна
+dis_height = 500
 
-rand_x = random.randint(0, 24)
-rand_y = random.randint(0, 24)
+# Определяем главное окно
+dis = pygame.display.set_mode((dis_width, dis_height))
 
-snake.append(create_item(canvas, snake_x, snake_y, 'green'))
-apple = create_item(canvas, rand_x, rand_y, 'red')
+# Задаём title
+pygame.display.set_caption('Snake Game by Pythonist')
 
-class Snake:
-    
-    def __init__(self, canvas, root, snake, snake_x, snake_y, len_snake, apple, speed, direction, score):
-        
-        self.canvas = canvas
-        self.snake = snake
-        self.snake_x = snake_x
-        self.snake_y = snake_y
-        self.len_snake = len_snake
-        self.apple = apple
-        self.speed = speed
-        self.direction = direction
-        self.score = score
-        self.root = root
-    
-    def check_border_pos(self):
-        
-        if self.snake_x == -1:
-            self.snake_x = 24
-        if self.snake_x == 25:
-            self.snake_x = 0
-        if self.snake_y == -1:
-            self.snake_y = 24
-        if self.snake_y == 25:
-            self.snake_y = 0 
-    
-    def move_snake(self, x, y):
-        
-        while 1 > 0:
+clock = pygame.time.Clock()
+ 
+snake_block = 10
+snake_speed = 15
 
-            d = 1
-            self.snake_x = self.snake_x + x
-            self.snake_y = self.snake_y + y
-            self.check_border_pos()
-                
-            for d in range(0, len(self.snake) - 1):
-                if self.canvas.coords(self.snake[len(self.snake) - 1]) == self.canvas.coords(self.snake[d]):
-                    # while 1 > 0:
-                    #     time.sleep(10)
-                    self.len_snake = 1
+# pygame.font.Font('bionicle-training-card-font-2-4.ttf', 36)
+game_over_font = pygame.font.Font("EightBits.ttf", 150)
 
-            self.snake.append(create_item(self.canvas, self.snake_x, self.snake_y, 'green'))
-            if len(self.snake) > self.len_snake:
-                while len(self.snake) > self.len_snake:
-                    self.canvas.delete(self.snake.pop(0))
-                    self.root.update()
-                    time.sleep(self.speed)
+score_font = pygame.font.Font("EightBits.ttf", 35)
+ 
+ 
+def our_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(dis, green, [x[0], x[1], snake_block, snake_block])
+ 
+ 
+def message(msg, color, x, y, font_size):
+    mesg = pygame.font.Font("EightBits.ttf", font_size).render(msg, True, color)
+    dis.blit(mesg, [x, y])
+ 
+def menu(length_of_snake):
+    message(f'score: {length_of_snake - 1}', red, 10, 0, 35)
+    message('|   q - quit', red, 120, 0, 35)
+    message('space - pause', red, 270, 0, 35)
+    message('r - restart', red, 440, 0, 35)
+
+ 
+def gameLoop():
+    game_over = False
+    game_close = False
+    pause = True
+    direction = []
+
+    x1 = dis_width / 2
+    y1 = dis_height / 2
+ 
+    x1_change = 0
+    y1_change = 0
+ 
+    snake_List = []
+    length_of_snake = 1
+ 
+    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0 + 40
+    foody = random.randint(5, 43) * snake_block
+
+    # Главный цикл игры
+    while not game_over:
+ 
+        while game_close == True:
+            dis.fill(black)
+            pygame.draw.line(dis, violet, [0, 45], [600, 45], 3)
+            message("GAME OVER!", violet, 77, 100, 150)
+            message('press "r" to restart ', violet, 150, 300, 50)
+            menu(length_of_snake)
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_r:
+                        gameLoop()
+ 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+
+                # Если нажаты клавиши 
+                if event.key == pygame.K_q:
+                    game_over = True
+                    game_close = False
+                if event.key == pygame.K_r:
+                    return gameLoop()
+                if event.key == pygame.K_LEFT:
+                    if direction == 'right':
+                        break
+                    x1_change = -snake_block
+                    y1_change = 0
+                    direction = 'left'
+
+                elif event.key == pygame.K_RIGHT:
+                    if direction == 'left':
+                        break
+                    x1_change = snake_block
+                    y1_change = 0
+                    direction = 'right' 
             
-            if self.canvas.coords(self.apple) == self.canvas.coords(self.snake[len(self.snake) - 1]):
-                self.canvas.delete(self.apple)
-                self.len_snake = self.len_snake + 1
-                self.canvas.delete(score)
-                self.score = self.canvas.create_text(300, 50, text=self.len_snake, fill='violet', font=('Helvetica 15 bold'))
-                self.speed = self.speed - 0.001
-                self.rand_x = random.randint(0, 24)
-                self.rand_y = random.randint(0, 24)
-                self.apple = create_item(self.canvas, self.rand_x, self.rand_y, 'red')
+                elif event.key == pygame.K_UP:
+                    if direction == 'down':
+                        break
+                    y1_change = -snake_block
+                    x1_change = 0
+                    direction = 'up'
+                elif event.key == pygame.K_DOWN:
+                    if direction == 'up':
+                        break
+                    y1_change = snake_block
+                    x1_change = 0
+                    direction = 'down'
+                if event.key == pygame.K_a:
+                    if direction == 'right':
+                        break
+                    x1_change = -snake_block
+                    y1_change = 0
+                    direction = 'left'
+
+                elif event.key == pygame.K_d:
+                    if direction == 'left':
+                        break
+                    x1_change = snake_block
+                    y1_change = 0
+                    direction = 'right' 
             
-    def check_direction(self, event, x, y, function_direction):
-        
-        if self.direction == 'Up' and function_direction == 'Down':
-            return 0
-        if self.direction == 'Down' and function_direction == 'Up':
-            return 0
-        if self.direction == 'Left' and function_direction == 'Right':
-            return 0
-        if self.direction == 'Right' and function_direction == 'Left':
-            return 0
-        else:
-            self.direction = function_direction
-            self.move_snake(x, y)
-        
-snake = Snake(canvas, root, snake, snake_x, snake_y, len_snake, apple, speed, direction, score)
+                elif event.key == pygame.K_w:
+                    if direction == 'down':
+                        break
+                    y1_change = -snake_block
+                    x1_change = 0
+                    direction = 'up'
+                elif event.key == pygame.K_s:
+                    if direction == 'up':
+                        break
+                    y1_change = snake_block
+                    x1_change = 0
+                    direction = 'down'
+                elif event.key == pygame.K_SPACE:
+                    pause = True
+                    while pause == True:
+                        time.sleep(0.1)
+                        
+                        for event in pygame.event.get():
+                            if event.type == pygame.KEYDOWN:
+                                if event.key == pygame.K_SPACE:
+                                    pause = False
+ 
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 == 40:
+            game_close = True
+            continue
 
-canvas.bind_all("<KeyPress-Up>", lambda event: snake.check_direction(event, 0, -1, 'Up'))
-canvas.bind_all("<KeyPress-Down>", lambda event: snake.check_direction(event, 0, 1, 'Down'))
-canvas.bind_all("<KeyPress-Left>", lambda event: snake.check_direction(event, -1, 0, 'Left'))
-canvas.bind_all("<KeyPress-Right>", lambda event: snake.check_direction(event, 1, 0, 'Right'))
-
-root.mainloop()
-
+        x1 += x1_change
+        y1 += y1_change
+        dis.fill(black)
+        pygame.draw.rect(dis, red, [foodx, foody, snake_block, snake_block])
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_List.append(snake_Head)
+        if len(snake_List) > length_of_snake:
+            del snake_List[0]
+ 
+        for x in snake_List[:-1]:
+            if x == snake_Head:
+                game_close = True
+ 
+        our_snake(snake_block, snake_List)
+        pygame.draw.line(dis, violet, [0, 45], [600, 45], 3)
+        menu(length_of_snake)
+    
+        pygame.display.update()
+ 
+        if x1 == foodx and y1 == foody:
+            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+            foody = random.randint(5, 43) * snake_block
+            length_of_snake += 1
+ 
+        clock.tick(snake_speed)
+ 
+    pygame.quit()
+    quit()
+ 
+gameLoop()
 
