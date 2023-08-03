@@ -25,7 +25,7 @@ dis_height = 500
 dis = pygame.display.set_mode((dis_width, dis_height))
 
 # Задаём title
-pygame.display.set_caption('Snake Game by Pythonist')
+pygame.display.set_caption('dvoryashin snake')
 
 clock = pygame.time.Clock()
  
@@ -69,7 +69,7 @@ def gameLoop():
     snake_List = []
     length_of_snake = 1
  
-    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0 + 40
+    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
     foody = random.randint(5, 43) * snake_block
 
     # Главный цикл игры
@@ -82,6 +82,8 @@ def gameLoop():
             message('press "r" to restart ', violet, 150, 300, 50)
             menu(length_of_snake)
             pygame.display.update()
+            print(foodx)
+            # print(foody)
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
@@ -89,10 +91,15 @@ def gameLoop():
                         game_close = False
                     if event.key == pygame.K_r:
                         gameLoop()
+                if event.type == pygame.QUIT:
+                    game_over = True
+                    game_close = False
+                    pygame.quit()
  
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
+                pygame.quit()
             if event.type == pygame.KEYDOWN:
 
                 # Если нажаты клавиши 
@@ -109,6 +116,7 @@ def gameLoop():
                     direction = 'left'
 
                 elif event.key == pygame.K_RIGHT:
+                    print(foodx)
                     if direction == 'left':
                         break
                     x1_change = snake_block
@@ -192,6 +200,7 @@ def gameLoop():
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
             foody = random.randint(5, 43) * snake_block
             length_of_snake += 1
+            # snake_speed = snake_speed + 1
  
         clock.tick(snake_speed)
  
@@ -199,4 +208,3 @@ def gameLoop():
     quit()
  
 gameLoop()
-
